@@ -1,5 +1,7 @@
 # WorkSquared
 
+WorkSquared is an AI-enabled work environment.
+
 ## Running locally
 
 ```bash
