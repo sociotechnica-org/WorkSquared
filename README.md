@@ -1,6 +1,4 @@
-# TodoMVC Example
-
-[Demo](https://todovmc.livestore.dev)
+# WorkSquared
 
 ## Running locally
 
