@@ -1,6 +1,6 @@
-# WorkSquared
+# Work Squared
 
-WorkSquared is an AI-enabled work environment.
+Work Squared is an AI-enabled work environment.
 
 ## Running locally
 
