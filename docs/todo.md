@@ -3,8 +3,8 @@
 ## Quick Reference
 - **Design Doc**: [work-squared-demo-design.md](./work-squared-demo-design.md)
 - **Goal**: Build chat system AND Kanban board in parallel
-- **Timeline**: 3-4 days with 2 parallel Claude instances
 - **Strategy**: Vertical slices - each issue includes events → UI → tests
+- **Approach**: 2 Claude instances working on independent tracks
 
 ## Parallelization Strategy
 
@@ -346,26 +346,22 @@ Tasks:
 
 ---
 
-## Execution Timeline
+## Execution Sequence
 
-### Day 0 (Setup - 2-3 hours)
-- Both: Issue #0 (Cloudflare deployment)
-- Both: Issue #S1 (Shared interfaces)
+### Phase 0: Setup (Both Instances)
+1. Issue #0 - Cloudflare deployment
+2. Issue #S1 - Shared interfaces
 
-### Day 1-2 (Parallel Development)
-- Instance 1: A1 → A2 (Chat core)
-- Instance 2: B1 → B2 (Kanban core)
-- Daily sync to share patterns
+### Phase 1: Core Features (Parallel)
+- **Instance 1**: A1 → A2 (Chat foundation → LLM integration)
+- **Instance 2**: B1 → B2 (Kanban board → CRUD operations)
 
-### Day 3 (Features & Polish)
-- Instance 1: A3 → A4 (Chat polish)
-- Instance 2: B3 → B4 (Kanban tools)
-- Afternoon: Start integration
+### Phase 2: Enhancement (Parallel)
+- **Instance 1**: A3 → A4 (Model picker → Activity log)
+- **Instance 2**: B3 → B4 (LLM tools → Activity log)
 
-### Day 4 (Integration & Demo)
-- Morning: I1 → I2 (Integration)
-- Afternoon: I3 (Polish)
-- Final demo preparation
+### Phase 3: Integration (Both)
+- I1 → I2 → I3 (Connect systems → Unified experience → Demo polish)
 
 ## Success Metrics
 
