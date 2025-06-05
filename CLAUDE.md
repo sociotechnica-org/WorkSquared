@@ -64,3 +64,10 @@ Work Squared is a real-time collaborative web application built with:
 - `/src/cf-worker/` - Cloudflare Worker for sync server
 - `/src/components/` - React components
 - `/src/livestore.worker.ts` - SharedWorker for LiveStore operations
+
+## Important Guidelines
+
+- When creating work plans or implementation tasks, NEVER include time estimates - focus on sequencing and dependencies only
+- Prefer vertical slices (full features) over horizontal layers when possible
+- Each PR should be small, focused, and demoable
+- Always run tests before creating a PR

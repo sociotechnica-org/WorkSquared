@@ -19,7 +19,6 @@
 
 #### Issue #0: Deploy to Cloudflare Pages
 **Branch**: `feat/cloudflare-deploy`
-**Time**: 1-2 hours
 **Assignee**: Either instance
 **Critical**: This enables PR preview deployments for all subsequent work
 
@@ -42,14 +41,57 @@ Benefits:
 
 ---
 
+### Issue #0.5: Testing Infrastructure Setup
+**Branch**: `feat/testing-setup`
+**Assignee**: Either instance
+**Critical**: This enables test-driven development for all subsequent work
+
+Tasks:
+- [ ] Jest and React Testing Library setup:
+  - [ ] Install dependencies: `@testing-library/react`, `@testing-library/jest-dom`, `jest-environment-jsdom`
+  - [ ] Configure `jest.config.js` for React/TypeScript
+  - [ ] Add test scripts to package.json
+  - [ ] Create `src/test-utils.tsx` with LiveStore providers
+- [ ] Playwright setup:
+  - [ ] Install `@playwright/test`
+  - [ ] Create `playwright.config.ts` with Chrome, Firefox configs
+  - [ ] Set up test fixtures for LiveStore initialization
+  - [ ] Add GitHub Actions workflow for E2E tests
+- [ ] Testing patterns:
+  - [ ] Create example unit test for a LiveStore event
+  - [ ] Create example component test with mock data
+  - [ ] Create example E2E test for basic navigation
+- [ ] Documentation:
+  - [ ] Update CLAUDE.md with test commands
+  - [ ] Add testing best practices section
+
+Files to create/modify:
+- Create: `jest.config.js`
+- Create: `playwright.config.ts`
+- Create: `src/test-utils.tsx`
+- Create: `tests/unit/example.test.ts`
+- Create: `tests/components/example.test.tsx`
+- Create: `tests/e2e/smoke.spec.ts`
+- Create: `.github/workflows/test.yml`
+- Update: `package.json`
+- Update: `CLAUDE.md`
+
+Success Criteria:
+- [ ] `pnpm test` runs unit tests
+- [ ] `pnpm test:e2e` runs Playwright tests
+- [ ] Tests run in CI on every PR
+- [ ] Test utilities available for all future work
+
+---
+
 ### Shared Interfaces & Setup
 
-#### Issue #S1: Core Types and Interfaces
+#### Issue #S1: Core Types and LLM Service Contract
 **Branch**: `feat/core-types`
-**Time**: 1 hour
 **Assignee**: Both review together
+**Critical**: Defines shared contracts to prevent integration issues
 
-Create shared types that both tracks will use:
+Create shared types and service interfaces that both tracks will use:
 
 ```typescript
 // src/types/index.ts
@@ -62,6 +104,7 @@ export interface BaseEvent {
 export interface Model {
   id: string
   name: string
+  provider: 'anthropic' | 'openai'
 }
 
 // src/types/chat.ts
@@ -70,7 +113,25 @@ export interface ChatMessageEvent extends BaseEvent {
   role: 'user' | 'assistant' | 'system'
   content: string
   modelId?: string
-  metadata?: Record<string, any>
+  metadata?: {
+    streaming?: boolean
+    toolCalls?: ToolCall[]
+    error?: string
+    tokenUsage?: TokenUsage
+  }
+}
+
+export interface ToolCall {
+  id: string
+  name: string
+  parameters: Record<string, any>
+  result?: any
+}
+
+export interface TokenUsage {
+  prompt: number
+  completion: number
+  total: number
 }
 
 // src/types/kanban.ts
@@ -88,7 +149,87 @@ export interface Task {
   column: string
   position: number
 }
+
+// src/services/llm/types.ts - LLM Service Contract
+export interface ILLMService {
+  // Core chat functionality
+  sendMessage(params: SendMessageParams): Promise<ChatResponse>
+  streamMessage(params: SendMessageParams): AsyncGenerator<StreamChunk>
+  
+  // Tool handling
+  registerTool(tool: ToolDefinition): void
+  executeTool(toolCall: ToolCall): Promise<ToolResult>
+  
+  // Model management
+  listModels(): Model[]
+  getCurrentModel(): Model
+  setModel(modelId: string): void
+}
+
+export interface SendMessageParams {
+  content: string
+  modelId?: string
+  systemPrompt?: string
+  tools?: ToolDefinition[]
+  temperature?: number
+  maxTokens?: number
+}
+
+export interface ChatResponse {
+  content: string
+  toolCalls?: ToolCall[]
+  usage?: TokenUsage
+  modelId: string
+}
+
+export interface StreamChunk {
+  type: 'content' | 'tool_call' | 'error' | 'done'
+  content?: string
+  toolCall?: ToolCall
+  error?: string
+}
+
+export interface ToolDefinition {
+  name: string
+  description: string
+  parameters: {
+    type: 'object'
+    properties: Record<string, any>
+    required: string[]
+  }
+}
+
+export interface ToolResult {
+  toolCallId: string
+  result: any
+  error?: string
+}
+
+// src/tools/types.ts - Tool System Types
+export interface ITool {
+  definition: ToolDefinition
+  execute(parameters: any): Promise<any>
+}
+
+export interface IToolRegistry {
+  register(tool: ITool): void
+  get(name: string): ITool | undefined
+  list(): ToolDefinition[]
+  execute(toolCall: ToolCall): Promise<ToolResult>
+}
 ```
+
+Additional setup:
+- [ ] Create mock implementation of ILLMService for testing
+- [ ] Create mock tool registry
+- [ ] Define available models constant
+- [ ] Create LiveStore event types for tool executions
+
+Benefits:
+- Both tracks use same LLM interface
+- Tool system is extensible
+- Clear separation between LLM provider and app logic
+- Easy to mock for testing
 
 ---
 
@@ -96,7 +237,6 @@ export interface Task {
 
 ### Issue #A1: Basic Chat Message Flow
 **Branch**: `feat/chat-messages`
-**Time**: 4-6 hours
 **Deliverable**: Users can send messages and see them appear
 
 Tasks:
@@ -126,7 +266,6 @@ PR must include:
 
 ### Issue #A2: LLM Integration with Streaming
 **Branch**: `feat/llm-integration`
-**Time**: 4-6 hours
 **Deliverable**: Real LLM responses with streaming
 
 Tasks:
@@ -153,7 +292,6 @@ Tasks:
 
 ### Issue #A3: Model Picker and Chat Polish
 **Branch**: `feat/model-picker`
-**Time**: 3-4 hours
 **Deliverable**: Can switch between models, polished chat UX
 
 Tasks:
@@ -175,27 +313,29 @@ Tasks:
   - [ ] Test markdown rendering
   - [ ] E2E: Switch model mid-conversation
 
-### Issue #A4: Chat Activity Log
+### Issue #A4: Chat Activity Components
 **Branch**: `feat/chat-activity`
-**Time**: 3-4 hours
-**Deliverable**: Activity panel showing chat events
+**Deliverable**: Chat-specific activity item components
 
 Tasks:
-- [ ] Create activity components:
-  - [ ] `src/components/activity/ActivityPanel.tsx`
+- [ ] Create chat activity components:
   - [ ] `src/components/activity/ChatActivityItem.tsx`
-  - [ ] Filter controls for event types
-- [ ] Connect to events:
-  - [ ] Query all chat-related events
-  - [ ] Real-time updates
-  - [ ] Show event details on click
-- [ ] Polish:
-  - [ ] Smooth animations
-  - [ ] Clear event descriptions
+  - [ ] Message sent/received indicators
+  - [ ] Model change notifications
+  - [ ] Error state displays
+- [ ] Event formatting:
+  - [ ] Human-readable event descriptions
   - [ ] Timestamp formatting
+  - [ ] User vs assistant distinction
+- [ ] Visual design:
+  - [ ] Icon system for different events
+  - [ ] Color coding for event types
+  - [ ] Compact vs expanded views
 - [ ] Tests:
-  - [ ] Activity appears for all chat actions
-  - [ ] Filtering works correctly
+  - [ ] Component renders all event types
+  - [ ] Formatting works correctly
+
+Note: This creates the chat-specific components only. The main ActivityPanel will be created in Issue #I2 during integration phase.
 
 ---
 
@@ -203,7 +343,6 @@ Tasks:
 
 ### Issue #B1: Basic Kanban Board
 **Branch**: `feat/kanban-board`
-**Time**: 4-6 hours
 **Deliverable**: Working Kanban board with drag-and-drop
 
 Tasks:
@@ -232,7 +371,6 @@ PR must include:
 
 ### Issue #B2: Task CRUD Operations
 **Branch**: `feat/task-crud`
-**Time**: 4-6 hours
 **Deliverable**: Can create, edit, delete tasks
 
 Tasks:
@@ -259,7 +397,6 @@ Tasks:
 
 ### Issue #B3: LLM Kanban Tools
 **Branch**: `feat/kanban-tools`
-**Time**: 4-6 hours
 **Deliverable**: LLM can manipulate Kanban board
 
 Tasks:
@@ -281,28 +418,30 @@ Tasks:
   - [ ] Board updates from tool calls
   - [ ] Error handling for invalid operations
 
-### Issue #B4: Kanban Activity Log
+### Issue #B4: Kanban Activity Components
 **Branch**: `feat/kanban-activity`
-**Time**: 3-4 hours
-**Deliverable**: Activity panel showing Kanban events
+**Deliverable**: Kanban-specific activity item components
 
 Tasks:
-- [ ] Create activity components:
+- [ ] Create kanban activity components:
   - [ ] `src/components/activity/KanbanActivityItem.tsx`
-  - [ ] Visual indicators for different events
+  - [ ] Task lifecycle indicators (created/moved/updated/deleted)
+  - [ ] Visual column indicators
   - [ ] Link to affected tasks
-- [ ] Event descriptions:
+- [ ] Event formatting:
   - [ ] "Task 'X' created in Backlog"
   - [ ] "Task 'Y' moved to In Progress"
   - [ ] "Task 'Z' updated by AI"
-- [ ] Integration:
-  - [ ] Merge with chat activity log
-  - [ ] Unified filtering
-  - [ ] Chronological order
+  - [ ] Highlight AI vs manual actions
+- [ ] Visual design:
+  - [ ] Column color coding
+  - [ ] Task preview in activity
+  - [ ] Animated state transitions
 - [ ] Tests:
-  - [ ] All Kanban events appear
-  - [ ] Can filter by event type
-  - [ ] Links work correctly
+  - [ ] Component renders all event types
+  - [ ] Links navigate correctly
+
+Note: This creates the kanban-specific components only. The main ActivityPanel will be created in Issue #I2 during integration phase.
 
 ---
 
@@ -310,7 +449,6 @@ Tasks:
 
 ### Issue #I1: Connect Chat to Kanban Tools
 **Branch**: `feat/chat-kanban-integration`
-**Time**: 2-3 hours
 **Assignee**: Both collaborate
 
 Tasks:
@@ -320,21 +458,33 @@ Tasks:
 - [ ] Update activity log to show connections
 - [ ] Demo script for tool usage
 
-### Issue #I2: Unified Activity Log
+### Issue #I2: Unified Activity Panel
 **Branch**: `feat/unified-activity`
-**Time**: 2-3 hours
 **Assignee**: Either instance
+**Dependencies**: A4 and B4 must be completed
 
 Tasks:
-- [ ] Merge activity streams
-- [ ] Consistent styling
-- [ ] Advanced filtering
-- [ ] Export activity log
-- [ ] Performance optimization
+- [ ] Create main activity panel:
+  - [ ] `src/components/activity/ActivityPanel.tsx` (main container)
+  - [ ] Query all events from LiveStore
+  - [ ] Route events to appropriate item components (ChatActivityItem or KanbanActivityItem)
+  - [ ] Implement infinite scroll for performance
+- [ ] Filtering system:
+  - [ ] Filter by event type (chat/kanban/all)
+  - [ ] Filter by time range
+  - [ ] Search within activity
+  - [ ] Save filter preferences
+- [ ] Activity features:
+  - [ ] Export activity log as JSON/CSV
+  - [ ] Jump to related content (message/task)
+  - [ ] Activity statistics summary
+- [ ] Tests:
+  - [ ] Both chat and kanban events appear
+  - [ ] Filtering works correctly
+  - [ ] Performance with 1000+ events
 
 ### Issue #I3: Demo Polish & Workflow
 **Branch**: `feat/demo-polish`
-**Time**: 3-4 hours
 **Assignee**: Both collaborate
 
 Tasks:
@@ -350,7 +500,8 @@ Tasks:
 
 ### Phase 0: Setup (Both Instances)
 1. Issue #0 - Cloudflare deployment
-2. Issue #S1 - Shared interfaces
+2. Issue #0.5 - Testing infrastructure
+3. Issue #S1 - Shared interfaces and LLM service contract
 
 ### Phase 1: Core Features (Parallel)
 - **Instance 1**: A1 → A2 (Chat foundation → LLM integration)
