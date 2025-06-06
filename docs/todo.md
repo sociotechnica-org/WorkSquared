@@ -41,46 +41,71 @@ Benefits:
 
 ---
 
-### Issue #0.5: Testing Infrastructure Setup
+### Issue #0.5: Testing Infrastructure Setup ✅ COMPLETED
 **Branch**: `feat/testing-setup`
 **Assignee**: Either instance
 **Critical**: This enables test-driven development for all subsequent work
 
 Tasks:
-- [ ] Jest and React Testing Library setup:
-  - [ ] Install dependencies: `@testing-library/react`, `@testing-library/jest-dom`, `jest-environment-jsdom`
-  - [ ] Configure `jest.config.js` for React/TypeScript
-  - [ ] Add test scripts to package.json
-  - [ ] Create `src/test-utils.tsx` with LiveStore providers
-- [ ] Playwright setup:
-  - [ ] Install `@playwright/test`
-  - [ ] Create `playwright.config.ts` with Chrome, Firefox configs
-  - [ ] Set up test fixtures for LiveStore initialization
-  - [ ] Add GitHub Actions workflow for E2E tests
-- [ ] Testing patterns:
-  - [ ] Create example unit test for a LiveStore event
-  - [ ] Create example component test with mock data
-  - [ ] Create example E2E test for basic navigation
-- [ ] Documentation:
-  - [ ] Update CLAUDE.md with test commands
-  - [ ] Add testing best practices section
+- [x] Jest and React Testing Library setup:
+  - [x] Install dependencies: `@testing-library/react`, `@testing-library/jest-dom`, `jest-environment-jsdom`
+  - [x] Configure `jest.config.js` for React/TypeScript
+  - [x] Add test scripts to package.json
+  - [x] Create `src/test-utils.tsx` with LiveStore providers
+- [x] Playwright setup:
+  - [x] Install `@playwright/test`
+  - [x] Create `playwright.config.ts` with Chrome, Firefox configs
+  - [x] Set up test fixtures for LiveStore initialization
+  - [x] Add GitHub Actions workflow for E2E tests
+  - [x] Configure Playwright for visual regression testing
+- [x] Storybook setup:
+  - [x] Install `@storybook/react-vite` and dependencies
+  - [x] Initialize Storybook with `npx storybook@latest init`
+  - [x] Configure for TypeScript and Tailwind CSS
+  - [x] Create `.storybook/preview.tsx` with LiveStore decorators
+  - [x] Set up component story examples
+  - [x] Configure Storybook test runner
+  - [ ] Add Chromatic for visual regression (optional - skipped for MVP)
+- [x] Testing patterns:
+  - [x] Create example unit test for a LiveStore event
+  - [x] Create example component test with mock data
+  - [x] Create example E2E test for basic navigation
+  - [x] Create example Storybook story for a component
+  - [x] Create visual regression test example
+- [x] Documentation:
+  - [x] Update CLAUDE.md with all test commands
+  - [x] Add testing best practices section
+  - [x] Document Storybook patterns for LiveStore components
 
-Files to create/modify:
-- Create: `jest.config.js`
-- Create: `playwright.config.ts`
-- Create: `src/test-utils.tsx`
-- Create: `tests/unit/example.test.ts`
-- Create: `tests/components/example.test.tsx`
-- Create: `tests/e2e/smoke.spec.ts`
-- Create: `.github/workflows/test.yml`
-- Update: `package.json`
-- Update: `CLAUDE.md`
+Files created/modified:
+- Created: `jest.config.mjs`
+- Created: `playwright.config.ts`
+- Created: `src/test-utils.tsx`
+- Created: `tests/unit/example.test.ts`
+- Created: `tests/components/example.test.tsx`
+- Created: `tests/e2e/smoke.spec.ts`
+- Created: `.storybook/main.ts`
+- Created: `.storybook/preview.tsx`
+- Created: `src/stories/example.stories.tsx`
+- Created: `.github/workflows/test.yml`
+- Created: `.env.example`
+- Updated: `package.json`
+- Updated: `CLAUDE.md`
+- Updated: `README.md`
 
 Success Criteria:
-- [ ] `pnpm test` runs unit tests
-- [ ] `pnpm test:e2e` runs Playwright tests
-- [ ] Tests run in CI on every PR
-- [ ] Test utilities available for all future work
+- [x] `pnpm test` runs unit tests
+- [x] `pnpm test:e2e` runs Playwright tests
+- [x] `pnpm storybook` launches Storybook dev server on port 6010
+- [x] `pnpm test:storybook` runs Storybook tests
+- [x] Tests run in CI on every PR
+- [x] Visual regression tests catch UI changes
+- [x] Test utilities available for all future work
+
+**Notes**: 
+- Storybook configured to run on port 6010 to avoid conflicts
+- Jest configured with ESM support via jest.config.mjs
+- All test infrastructure ready for TDD approach
 
 ---
 
@@ -500,7 +525,7 @@ Tasks:
 
 ### Phase 0: Setup (Both Instances)
 1. Issue #0 - Cloudflare deployment
-2. Issue #0.5 - Testing infrastructure
+2. Issue #0.5 - Testing infrastructure ✅ COMPLETED
 3. Issue #S1 - Shared interfaces and LLM service contract
 
 ### Phase 1: Core Features (Parallel)
