@@ -12,6 +12,27 @@ pnpm
 # Run development server (starts both Vite and Wrangler concurrently)
 export VITE_LIVESTORE_SYNC_URL='http://localhost:8787'
 pnpm dev
+
+# Run Storybook (port 6010 - avoids conflicts with other instances)
+pnpm storybook
+```
+
+### Testing
+```bash
+# Run unit tests (Jest)
+pnpm test
+
+# Run unit tests in watch mode
+pnpm test -- --watch
+
+# Run E2E tests (Playwright)
+pnpm test:e2e
+
+# Run E2E tests in UI mode
+pnpm test:e2e -- --ui
+
+# Run Storybook tests
+pnpm test:storybook
 ```
 
 ### Build
@@ -21,6 +42,9 @@ pnpm build
 
 # Build with bundle analysis
 pnpm build:analyze
+
+# Build Storybook static site
+pnpm build-storybook
 ```
 
 ### Cloudflare Workers
@@ -71,3 +95,41 @@ Work Squared is a real-time collaborative web application built with:
 - Prefer vertical slices (full features) over horizontal layers when possible
 - Each PR should be small, focused, and demoable
 - Always run tests before creating a PR
+
+## Testing Best Practices
+
+### Unit Tests (Jest)
+- Test LiveStore events and materializers in isolation
+- Use the test utilities from `src/test-utils.tsx` for components
+- Mock external dependencies
+
+### Component Tests (React Testing Library)
+- Test user interactions, not implementation details
+- Use `data-testid` attributes for reliable element selection
+- Always wrap components with LiveStore provider using test utilities
+
+### E2E Tests (Playwright)
+- Test complete user workflows
+- Use page objects pattern for complex interactions
+- Test multi-tab sync scenarios
+- Visual regression testing for critical UI components
+
+### Storybook
+- Create stories for all UI components
+- Use Storybook for visual testing and documentation
+- Test different component states and edge cases
+- Stories should be self-contained with mock data
+
+### LiveStore Testing Patterns
+```typescript
+// Use test store with memory adapter
+const store = createTestStore();
+
+// Add test data
+await store.mutate([
+  { type: 'todo.add', id: '1', text: 'Test', completed: false }
+]);
+
+// Test queries
+const todos = await store.query((db) => db.table('todos').all());
+```
